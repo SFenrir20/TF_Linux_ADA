@@ -14,12 +14,12 @@
 void mostrarMenu(CuckooHashing& hashTable) {
     int opcion;
     do {
-        std::cout << "\n--- Menú Principal ---\n";
+        std::cout << "\n--- Menu Principal ---\n";
         std::cout << "1. Insertar Ciudadano\n";
         std::cout << "2. Buscar Ciudadano\n";
         std::cout << "3. Eliminar Ciudadano\n";
         std::cout << "4. Salir\n";
-        std::cout << "Selecciona una opción: ";
+        std::cout << "Selecciona una opcion: ";
         std::cin >> opcion;
 
         switch (opcion) {

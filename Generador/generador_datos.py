@@ -4,13 +4,13 @@ import random
 
 # Función para cargar los datos desde un archivo CSV a una lista
 def cargar_datos(archivo):
-    with open(archivo, mode='r') as f:
+    with open(archivo, mode='r', encoding='utf-8') as f:
         return [linea.strip() for linea in f]
 
 # Cargar los datos desde los archivos CSV
-nombres = cargar_datos("Data/nombres.csv")
-apellidos = cargar_datos("Data/apellidos.csv")
-direcciones = cargar_datos("Data/direccion.csv")
+nombres = cargar_datos("D:\\Repos\\TF_Linux_EDA\\Generador\\Data\\nombres.csv")
+apellidos = cargar_datos("D:\\Repos\\TF_Linux_EDA\\Generador\\Data\\apellidos.csv")
+direcciones = cargar_datos("D:\\Repos\\TF_Linux_EDA\\Generador\\Data\\direccion.csv")
 
 # Listas fijas para otros datos
 nacionalidades = ["Peruano"]
@@ -46,4 +46,4 @@ def generar_ciudadanos(num_registros, archivo_salida):
     print(f"Generación de datos completa: {num_registros} registros guardados en {archivo_salida}")
 
 # Llamada a la función
-generar_ciudadanos(33, "ciudadanos.csv")
+generar_ciudadanos(20, "ciudadanos.csv")
