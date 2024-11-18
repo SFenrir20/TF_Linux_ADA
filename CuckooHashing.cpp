@@ -29,21 +29,21 @@ CuckooHashing::CuckooHashing(size_t size) : tabla1(size), tabla2(size), maxInten
         std::istringstream ss(linea);
         Ciudadano ciudadano;
 
-        std::getline(ss, ciudadano.dni, ',');
-        std::getline(ss, ciudadano.nombres, ',');
-        std::getline(ss, ciudadano.apellidos, ',');
-        std::getline(ss, ciudadano.nacionalidad, ',');
-        std::getline(ss, ciudadano.lugarNacimiento, ',');
+        std::getline(ss, ciudadano.dni, ';');
+        std::getline(ss, ciudadano.nombres, ';');
+        std::getline(ss, ciudadano.apellidos, ';');
+        std::getline(ss, ciudadano.nacionalidad, ';');
+        std::getline(ss, ciudadano.lugarNacimiento, ';');
 
         std::getline(ss, ciudadano.direccion.departamento, ',');
         std::getline(ss, ciudadano.direccion.provincia, ',');
         std::getline(ss, ciudadano.direccion.ciudad, ',');
-        std::getline(ss, ciudadano.direccion.distrito, ',');
+        std::getline(ss, ciudadano.direccion.distrito, ';');
 
 
-        std::getline(ss, ciudadano.telefono, ',');
-        std::getline(ss, ciudadano.correo, ',');
-        std::getline(ss, ciudadano.estadoCivil, ',');
+        std::getline(ss, ciudadano.telefono, ';');
+        std::getline(ss, ciudadano.correo, ';');
+        std::getline(ss, ciudadano.estadoCivil, ';');
 
         insertar(ciudadano); // Insertamos el ciudadano en la tabla hash
     }
@@ -96,9 +96,9 @@ bool CuckooHashing::insertar(const Ciudadano& ciudadano) {
     }
     //rehash();
     // Si no se pudo insertar
-    std::cerr << "Error: Ciclo detectado al intentar insertar el ciudadano con DNI: " << current.dni << std::endl;
+    std::cout << "Error: Ciclo detectado al intentar insertar el ciudadano con DNI: " << current.dni << std::endl;
     redimensionar();
-    std::cerr << "tamaño nevo de tabla" << tabla1.size() << std::endl;
+    std::cout << "tamaño nueva de tabla" << tabla1.size() << std::endl;
     return insertar(current);
 
 
@@ -111,22 +111,22 @@ void CuckooHashing::guardarDatos() {
         return;
     }
 
-    archivo << "DNI,Nombres,Apellidos,Nacionalidad,LugarNacimiento,Direccion,Telefono,Email,EstadoCivil\n";
+    //archivo << "DNI,Nombres,Apellidos,Nacionalidad,LugarNacimiento,Direccion,Telefono,Correo,EstadoCivil\n";
 
     for (const auto& entrada : tabla1) {
         if (entrada.has_value()) {
             const Ciudadano& ciudadano = entrada.value();
-            archivo << ciudadano.dni << ","
-                              << ciudadano.nombres << ","
-                              << ciudadano.apellidos << ","
-                              << ciudadano.nacionalidad << ","
-                              << ciudadano.lugarNacimiento << ","
-                              << ciudadano.direccion.departamento << ","
-                              << ciudadano.direccion.provincia << ","
-                              << ciudadano.direccion.ciudad << ","
-                              << ciudadano.direccion.distrito << ","
-                              << ciudadano.telefono << ","
-                              << ciudadano.correo << ","
+            archivo << ciudadano.dni << ";"
+                              << ciudadano.nombres << ";"
+                              << ciudadano.apellidos << ";"
+                              << ciudadano.nacionalidad << ";"
+                              << ciudadano.lugarNacimiento << ";"
+                             << ciudadano.direccion.departamento << ","
+                                << ciudadano.direccion.provincia << ","
+                                 << ciudadano.direccion.ciudad << ","
+                                << ciudadano.direccion.distrito << ";"
+                              << ciudadano.telefono<< ";"
+                              << ciudadano.correo << ";"
                               << ciudadano.estadoCivil << "\n";
         }
     }
@@ -134,17 +134,17 @@ void CuckooHashing::guardarDatos() {
     for (const auto& entrada : tabla2) {
         if (entrada.has_value()) {
             const Ciudadano& ciudadano = entrada.value();
-            archivo << ciudadano.dni << ","
-                    << ciudadano.nombres << ","
-                    << ciudadano.apellidos << ","
-                    << ciudadano.nacionalidad << ","
-                    << ciudadano.lugarNacimiento << ","
+            archivo << ciudadano.dni << ";"
+                    << ciudadano.nombres << ";"
+                    << ciudadano.apellidos << ";"
+                    << ciudadano.nacionalidad << ";"
+                    << ciudadano.lugarNacimiento << ";"
                     << ciudadano.direccion.departamento << ","
-                    << ciudadano.direccion.provincia << ","
-                    << ciudadano.direccion.ciudad << ","
-                    << ciudadano.direccion.distrito << ","
-                    << ciudadano.telefono << ","
-                    << ciudadano.correo << ","
+                             << ciudadano.direccion.provincia << ","
+                             << ciudadano.direccion.ciudad << ","
+                             << ciudadano.direccion.distrito << ";"
+                    << ciudadano.telefono<< ";"
+                    << ciudadano.correo << ";"
                     << ciudadano.estadoCivil << "\n";
         }
     }

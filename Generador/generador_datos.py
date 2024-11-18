@@ -2,10 +2,12 @@ import os
 import csv
 import random
 
+
 # Función para cargar los datos desde un archivo CSV a una lista
 def cargar_datos(archivo):
     with open(archivo, mode='r', encoding='utf-8') as f:
         return [linea.strip() for linea in f]
+
 
 # Cargar los datos desde los archivos CSV
 nombres = cargar_datos("D:\\Repos\\TF_Linux_EDA\\Generador\\Data\\nombres.csv")
@@ -17,16 +19,18 @@ nacionalidades = ["Peruano"]
 lugares_nacimiento = ["Lima", "Arequipa", "Cusco", "Trujillo", "Piura"]
 estados_civiles = ["Soltero", "Casado", "Divorciado", "Viudo"]
 
+
 # Generar registros de ciudadanos con DNIs correlativos
 def generar_ciudadanos(num_registros, archivo_salida):
-    # Verificar si el archivo ya existe
+    # Eliminar el archivo si ya existe, para evitar duplicados
     if os.path.exists(archivo_salida):
-        print(f"El archivo {archivo_salida} ya existe. No se generarán nuevos datos.")
-        return
+        os.remove(archivo_salida)  # Eliminar el archivo existente
+        print(f"Archivo existente {archivo_salida} eliminado para evitar duplicados.")
 
-    with open(archivo_salida, mode='w', newline='') as archivo:
-        escritor_csv = csv.writer(archivo)
-        escritor_csv.writerow(["DNI", "Nombres", "Apellidos", "Nacionalidad", "Lugar de Nacimiento", "Dirección", "Teléfono", "Correo", "Estado Civil"])
+    # Abrir el archivo en modo de escritura
+    with open(archivo_salida, mode='w', newline='', encoding='utf-8') as archivo:
+        escritor_csv = csv.writer(archivo, delimiter=';')
+
 
         for i in range(num_registros):
             # Asignar DNI correlativo empezando desde 10000000
@@ -41,9 +45,11 @@ def generar_ciudadanos(num_registros, archivo_salida):
             estado_civil = random.choice(estados_civiles)
 
             # Escribir el registro en el archivo CSV
-            escritor_csv.writerow([dni, nombre, apellido, nacionalidad, lugar_nacimiento, direccion, telefono, correo, estado_civil])
+            escritor_csv.writerow(
+                [dni, nombre, apellido, nacionalidad, lugar_nacimiento, direccion, telefono, correo, estado_civil])
 
     print(f"Generación de datos completa: {num_registros} registros guardados en {archivo_salida}")
 
+
 # Llamada a la función
-generar_ciudadanos(20, "ciudadanos.csv")
+generar_ciudadanos(3, "D:\\Repos\\TF_Linux_EDA\\Generador\\ciudadanos.csv")

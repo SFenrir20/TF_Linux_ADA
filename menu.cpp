@@ -24,6 +24,7 @@ void mostrarMenu(CuckooHashing& hashTable) {
 
         switch (opcion) {
             case 1: {
+                std::cin.ignore();
                 Ciudadano ciudadano;
                 std::cout << "DNI: "; std::cin >> ciudadano.dni;
                 std::cout << "Nombres: "; std::cin >> ciudadano.nombres;
@@ -37,9 +38,12 @@ void mostrarMenu(CuckooHashing& hashTable) {
                 std::cout << "Ciudad: "; std::cin >> ciudadano.direccion.ciudad;
                 std::cout << "Distrito: "; std::cin >> ciudadano.direccion.distrito;
 
-                std::cout << "Teléfono: "; std::cin >> ciudadano.telefono;
+                std::cout << "Teléfono:+51 "; std::cin >> ciudadano.telefono;
                 std::cout << "Correo: "; std::cin >> ciudadano.correo;
                 std::cout << "Estado Civil: "; std::cin >> ciudadano.estadoCivil;
+
+                ciudadano.telefono = "+51" + ciudadano.telefono;
+                ciudadano.correo = ciudadano.correo + "@ejemplo.com";
 
                 if (hashTable.insertar(ciudadano)) {
                     std::cout << "Ciudadano insertado con éxito.\n";
