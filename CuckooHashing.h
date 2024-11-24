@@ -9,30 +9,34 @@
 #include <string>
 #include <optional>
 #include <iostream>
+#include <fstream>
+#include <stdexcept>
 #include "Ciudadano.h"
 
 class CuckooHashing {
 public:
-    CuckooHashing(size_t size);
+    explicit CuckooHashing(size_t size);
     bool insertar(const Ciudadano& ciudadano);
-    void guardarDatos();
     std::optional<Ciudadano> buscar(const std::string& dni);
     bool eliminar(const std::string& dni);
-    void redimensionar();
-    bool tablaLlena() const;
-
-
-
+    void guardarTabla(const std::string& archivoBinario);
+    void cargarTablaDesdeBinario(const std::string& archivoBinario);
+    void cargarDesdeIndice(const std::string& archivoIndice);
+    void imprimirTabla(); // Para depuración
 
 private:
     std::vector<std::optional<Ciudadano>> tabla1;
     std::vector<std::optional<Ciudadano>> tabla2;
-    size_t maxIntentos;  // Para evitar ciclos infinitos en cuckoo hashing
-    size_t maxTamano;   // Tamaño máximo permitido para las tablas
-    size_t hash1(const std::string& dni);
-    size_t hash2(const std::string& dni);
+    size_t maxIntentos;
+
+    size_t hash1(const std::string& dni) const;
+    size_t hash2(const std::string& dni) const;
     void rehash();
+
+
+
 };
+
 
 
 #endif //CUCKOOHASHING_H

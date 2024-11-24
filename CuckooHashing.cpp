@@ -3,73 +3,30 @@
 //
 
 #include "CuckooHashing.h"
-#include <fstream>
-#include <sstream>
 
-// Constructor con tamaño de tablas y límite de intentos para evitar ciclos
-CuckooHashing::CuckooHashing(size_t size) : tabla1(size), tabla2(size), maxIntentos(10), maxTamano(33000000) {
-    if (size > maxTamano) {
-        throw std::invalid_argument("El tamaño inicial excede el máximo permitido.");
-    }
-    std::ifstream archivo("D:\\Repos\\TF_Linux_EDA\\Generador\\ciudadanos.csv");
-    if (!archivo.is_open()) {
-        std::cerr << "Error al abrir archivo" << std::endl;
-        throw std::runtime_error("No se pudo abrir el archivo.");
-    }
-
-    // Limita el número de líneas leídas, si es necesario
-    size_t max_lineas = 1000000;
-    size_t lineas_leidas = 0;
-
-    std::string linea;
-    while (std::getline(archivo, linea)&& lineas_leidas < max_lineas) {
-
-        std::cout << lineas_leidas++ << std::endl;
-
-        std::istringstream ss(linea);
-        Ciudadano ciudadano;
-
-        std::getline(ss, ciudadano.dni, ';');
-        std::getline(ss, ciudadano.nombres, ';');
-        std::getline(ss, ciudadano.apellidos, ';');
-        std::getline(ss, ciudadano.nacionalidad, ';');
-        std::getline(ss, ciudadano.lugarNacimiento, ';');
-
-        std::getline(ss, ciudadano.direccion.departamento, ',');
-        std::getline(ss, ciudadano.direccion.provincia, ',');
-        std::getline(ss, ciudadano.direccion.ciudad, ',');
-        std::getline(ss, ciudadano.direccion.distrito, ';');
+#include <cstdint>
+#include <iostream>
+#include <cstring>
 
 
-        std::getline(ss, ciudadano.telefono, ';');
-        std::getline(ss, ciudadano.correo, ';');
-        std::getline(ss, ciudadano.estadoCivil, ';');
-
-        insertar(ciudadano); // Insertamos el ciudadano en la tabla hash
-    }
-
-    archivo.close();
-}
+CuckooHashing::CuckooHashing(size_t size)
+    : tabla1(size), tabla2(size), maxIntentos(10) {}
 
 
-
-// Funciones hash (simple para ejemplo, puedes mejorarlas)
-size_t CuckooHashing::hash1(const std::string& dni) {
+// Funciones hash
+size_t CuckooHashing::hash1(const std::string& dni) const {
     std::hash<std::string> hash_fn;
     return hash_fn(dni) % tabla1.size();
 }
 
-size_t CuckooHashing::hash2(const std::string& dni) {
+size_t CuckooHashing::hash2(const std::string& dni) const {
     std::hash<std::string> hash_fn;
     return (hash_fn(dni) / tabla1.size()) % tabla2.size();
 }
 
-// Insertar un ciudadano con cuckoo hashing
+// Insertar un ciudadano en la tabla hash
 bool CuckooHashing::insertar(const Ciudadano& ciudadano) {
-
     Ciudadano current = ciudadano;
-
-    std::cout << "Intentando insertar ciudadano con DNI: " << current.dni << std::endl;
 
     for (size_t intentos = 0; intentos < maxIntentos; ++intentos) {
         size_t pos1 = hash1(current.dni);
@@ -77,11 +34,9 @@ bool CuckooHashing::insertar(const Ciudadano& ciudadano) {
             tabla1[pos1] = current;
             return true;
         }
-        // Colisión en tabla1, reubicando
-        std::cout << "Colisión en tabla1 en posición " << pos1 << ", reubicando..." << std::endl;
-        // Intercambio con tabla1
-        std::swap(current, tabla1[pos1].value());
 
+        // Colisión en tabla1
+        std::swap(current, tabla1[pos1].value());
         size_t pos2 = hash2(current.dni);
 
         if (!tabla2[pos2].has_value()) {
@@ -89,69 +44,14 @@ bool CuckooHashing::insertar(const Ciudadano& ciudadano) {
             return true;
         }
 
-        // Colisión en tabla2, reubicando
-        std::cout << "Colisión en tabla2 en posición " << pos2 << ", reubicando..." << std::endl;
-        // Intercambio con tabla2
+        // Colisión en tabla2
         std::swap(current, tabla2[pos2].value());
     }
-    //rehash();
-    // Si no se pudo insertar
-    std::cout << "Error: Ciclo detectado al intentar insertar el ciudadano con DNI: " << current.dni << std::endl;
-    redimensionar();
-    std::cout << "tamaño nueva de tabla" << tabla1.size() << std::endl;
+
+    // Si no se pudo insertar, rehash y reintentar
+    rehash();
     return insertar(current);
-
-
 }
-
-void CuckooHashing::guardarDatos() {
-    std::ofstream archivo("D:\\Repos\\TF_Linux_EDA\\Generador\\ciudadanos.csv");
-    if (!archivo.is_open()) {
-        std::cerr << "Error al abrir ciudadanos.csv para guardar datos" << std::endl;
-        return;
-    }
-
-    //archivo << "DNI,Nombres,Apellidos,Nacionalidad,LugarNacimiento,Direccion,Telefono,Correo,EstadoCivil\n";
-
-    for (const auto& entrada : tabla1) {
-        if (entrada.has_value()) {
-            const Ciudadano& ciudadano = entrada.value();
-            archivo << ciudadano.dni << ";"
-                              << ciudadano.nombres << ";"
-                              << ciudadano.apellidos << ";"
-                              << ciudadano.nacionalidad << ";"
-                              << ciudadano.lugarNacimiento << ";"
-                             << ciudadano.direccion.departamento << ","
-                                << ciudadano.direccion.provincia << ","
-                                 << ciudadano.direccion.ciudad << ","
-                                << ciudadano.direccion.distrito << ";"
-                              << ciudadano.telefono<< ";"
-                              << ciudadano.correo << ";"
-                              << ciudadano.estadoCivil << "\n";
-        }
-    }
-
-    for (const auto& entrada : tabla2) {
-        if (entrada.has_value()) {
-            const Ciudadano& ciudadano = entrada.value();
-            archivo << ciudadano.dni << ";"
-                    << ciudadano.nombres << ";"
-                    << ciudadano.apellidos << ";"
-                    << ciudadano.nacionalidad << ";"
-                    << ciudadano.lugarNacimiento << ";"
-                    << ciudadano.direccion.departamento << ","
-                             << ciudadano.direccion.provincia << ","
-                             << ciudadano.direccion.ciudad << ","
-                             << ciudadano.direccion.distrito << ";"
-                    << ciudadano.telefono<< ";"
-                    << ciudadano.correo << ";"
-                    << ciudadano.estadoCivil << "\n";
-        }
-    }
-
-    archivo.close();
-}
-
 
 // Buscar un ciudadano por DNI
 std::optional<Ciudadano> CuckooHashing::buscar(const std::string& dni) {
@@ -185,75 +85,128 @@ bool CuckooHashing::eliminar(const std::string& dni) {
     return false;
 }
 
-// Rehash: duplicar el tamaño de la tabla y reinsertar elementos
+// Guardar tabla hash en un archivo binario
+void CuckooHashing::guardarTabla(const std::string& archivoBinario) {
+    std::ofstream file(archivoBinario, std::ios::binary);
+    if (!file.is_open()) {
+        throw std::runtime_error("No se pudo abrir el archivo para guardar la tabla hash.");
+    }
+
+    for (const auto& ciudadanoOpt : tabla1) {
+        if (ciudadanoOpt.has_value()) {
+            file.write(reinterpret_cast<const char*>(&ciudadanoOpt.value()), sizeof(Ciudadano));
+        }
+    }
+
+    for (const auto& ciudadanoOpt : tabla2) {
+        if (ciudadanoOpt.has_value()) {
+            file.write(reinterpret_cast<const char*>(&ciudadanoOpt.value()), sizeof(Ciudadano));
+        }
+    }
+
+    file.close();
+    std::cout << "Tabla hash guardada en " << archivoBinario << "\n";
+}
+
+// Cargar tabla hash desde un archivo binario
+void CuckooHashing::cargarTablaDesdeBinario(const std::string& archivoBinario) {
+    std::ifstream file(archivoBinario, std::ios::binary);
+    if (!file.is_open()) {
+        throw std::runtime_error("No se pudo abrir el archivo binario para cargar la tabla hash.");
+    }
+
+    Ciudadano ciudadano;
+    while (file.read(reinterpret_cast<char*>(&ciudadano), sizeof(Ciudadano))) {
+        insertar(ciudadano);
+    }
+
+    file.close();
+    std::cout << "Tabla hash cargada desde " << archivoBinario << "\n";
+}
+
+// Función para leer un registro Ciudadano desde un archivo binario
+Ciudadano leerCiudadanoDesdeBinario(const std::string& archivoBinario, uint32_t posicion) {
+    std::ifstream file(archivoBinario, std::ios::binary);
+    if (!file.is_open()) {
+        throw std::runtime_error("No se pudo abrir el archivo binario: " + archivoBinario);
+    }
+
+    Ciudadano ciudadano;
+    // Posiciona el puntero en el lugar correcto del archivo
+    file.seekg(posicion * sizeof(Ciudadano), std::ios::beg);
+    // Lee el registro en la estructura Ciudadano
+    file.read(reinterpret_cast<char*>(&ciudadano), sizeof(Ciudadano));
+
+    if (file.gcount() != sizeof(Ciudadano)) {
+        throw std::runtime_error("Error al leer el registro desde el archivo binario.");
+    }
+
+    return ciudadano;
+}
+
+// Cargar registros desde un archivo de índice y binarios
+void CuckooHashing::cargarDesdeIndice(const std::string& archivoIndice) {
+    std::ifstream indexFile(archivoIndice, std::ios::binary);
+    if (!indexFile.is_open()) {
+        throw std::runtime_error("No se pudo abrir el archivo de índice.");
+    }
+
+    struct Indice {
+        char dni[20];
+        char archivo[50];
+        uint32_t posicion;
+    };
+
+    Indice entrada;
+    while (indexFile.read(reinterpret_cast<char*>(&entrada), sizeof(Indice))) {
+        Ciudadano ciudadano = leerCiudadanoDesdeBinario(entrada.archivo, entrada.posicion);
+        insertar(ciudadano);
+    }
+
+    indexFile.close();
+    std::cout << "Registros cargados desde índice.\n";
+}
+
+// Rehash
 void CuckooHashing::rehash() {
-    std::vector<std::optional<Ciudadano>> oldTabla1 = tabla1;
-    std::vector<std::optional<Ciudadano>> oldTabla2 = tabla2;
-    tabla1.resize(tabla1.size() * 2);
-    tabla2.resize(tabla2.size() * 2);
+    size_t newSize = tabla1.size() * 2;
+    std::vector<std::optional<Ciudadano>> newTabla1(newSize);
+    std::vector<std::optional<Ciudadano>> newTabla2(newSize);
 
-    for (const auto& ciudadano : oldTabla1) {
-        if (ciudadano.has_value()) {
-            insertar(ciudadano.value());
+    for (const auto& ciudadanoOpt : tabla1) {
+        if (ciudadanoOpt.has_value()) {
+            insertar(ciudadanoOpt.value());
         }
     }
 
-    for (const auto& ciudadano : oldTabla2) {
-        if (ciudadano.has_value()) {
-            insertar(ciudadano.value());
+    for (const auto& ciudadanoOpt : tabla2) {
+        if (ciudadanoOpt.has_value()) {
+            insertar(ciudadanoOpt.value());
+        }
+    }
+
+    tabla1 = std::move(newTabla1);
+    tabla2 = std::move(newTabla2);
+    std::cout << "Rehash realizado. Nuevo tamaño: " << newSize << "\n";
+}
+
+// Para depuración
+void CuckooHashing::imprimirTabla() {
+    std::cout << "Tabla 1:\n";
+    for (size_t i = 0; i < tabla1.size(); ++i) {
+        if (tabla1[i].has_value()) {
+            std::cout << "[" << i << "] " << tabla1[i]->dni << "\n";
+        }
+    }
+
+    std::cout << "Tabla 2:\n";
+    for (size_t i = 0; i < tabla2.size(); ++i) {
+        if (tabla2[i].has_value()) {
+            std::cout << "[" << i << "] " << tabla2[i]->dni << "\n";
         }
     }
 }
 
 
-void CuckooHashing::redimensionar() {
-    size_t nuevoTamano = tabla1.size() * 2; // Doblar el tamaño de las tablas
-    std::vector<std::optional<Ciudadano>> Tabla1_Old = tabla1;
-    std::vector<std::optional<Ciudadano>> Tabla2_Old = tabla2;
-    tabla1.clear();
-    tabla2.clear();
-    tabla1.resize(tabla1.size() * 2);
-    tabla2.resize(tabla2.size() * 2);
-    // Verificar que no exceda el tamaño máximo permitido
-    if (nuevoTamano > maxTamano) {
-        throw std::overflow_error("Error: Tamaño máximo de las tablas excedido.");
-    }
 
-    for (const auto& entry : Tabla1_Old) {
-        if (entry.has_value()) {
-            // Reinsertar en las nuevas tablas
-            insertar(entry.value());
-        }
-    }
-    for (const auto& entry : Tabla2_Old) {
-        if (entry.has_value()) {
-            // Reinsertar en las nuevas tablas
-            insertar(entry.value());
-        }
-    }
-}
 
-bool CuckooHashing::tablaLlena() const {
-    size_t elementosOcupados = 0;
-
-    // Contar elementos ocupados en tabla1
-    for (const auto& entry : tabla1) {
-        if (entry.has_value()) {
-            elementosOcupados++;
-        }
-    }
-
-    // Contar elementos ocupados en tabla2
-    for (const auto& entry : tabla2) {
-        if (entry.has_value()) {
-            elementosOcupados++;
-        }
-    }
-
-    // Factor de carga máximo permitido (ajusta según tus necesidades)
-    const double maxFactorCarga = 1;
-    size_t capacidadTotal = tabla1.size() + tabla2.size();
-
-    // Verificar si excedemos el factor de carga permitido
-    return static_cast<double>(elementosOcupados) / capacidadTotal > maxFactorCarga;
-}

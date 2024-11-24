@@ -3,15 +3,35 @@
 #include "menu.h"
 
 int main() {
-    size_t size = 200;
-    CuckooHashing tablaHash(size); // Tamaño de 33 millones de registros
+    try {
+        // Inicializar la tabla hash con un tamaño base
+        size_t size = 200; // Puedes ajustar este tamaño si se requiere
+        CuckooHashing tablaHash(size);
 
-    // Cargar datos desde el archivo CSV al iniciar el programa
-    //cargarDatosDesdeCSV("D:\\Repos\\TF_Linux_EDA\\Generador\\ciudadanos.csv", tablaHash);
+        // Mostrar el menú principal
+        mostrarMenu(tablaHash);
 
-    mostrarMenu(tablaHash);
+        // Guardar los datos al salir del programa
+        std::string archivoSalida;
+        std::cout << "\n¿Desea guardar los datos de la tabla hash antes de salir? (s/n): ";
+        char opcion;
+        std::cin >> opcion;
 
-    tablaHash.guardarDatos();
+        if (opcion == 's' || opcion == 'S') {
+            std::cout << "Ingrese el nombre del archivo de salida: ";
+            std::cin >> archivoSalida;
+            tablaHash.guardarTabla(archivoSalida);
+            std::cout << "Datos guardados en el archivo: " << archivoSalida << "\n";
+        } else {
+            std::cout << "Datos no guardados.\n";
+        }
 
-    return 0;
+        std::cout << "Programa finalizado.\n";
+        return 0;
+
+    } catch (const std::exception& e) {
+        // Capturar cualquier error inesperado
+        std::cerr << "Error: " << e.what() << "\n";
+        return 1; // Retornar código de error
+    }
 }

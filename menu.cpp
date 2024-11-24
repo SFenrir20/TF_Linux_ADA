@@ -1,16 +1,149 @@
-//
-// Created by fenrirdev on 13/11/24.
-//
-
 #include "menu.h"
 #include "Ciudadano.h"
 #include "CuckooHashing.h"
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <string>
 
+// Función para insertar un ciudadano
+void insertarCiudadano(CuckooHashing& hashTable) {
+    Ciudadano ciudadano;
+    std::cout << "\n--- Insertar Ciudadano ---\n";
+    std::cin.ignore();
+    std::cout << "DNI (8 dígitos): ";
+    std::cin.getline(ciudadano.dni, 20); // Leer DNI como char[]
 
+    if (std::strlen(ciudadano.dni) != 8) {
+        std::cout << "Error: El DNI debe tener 8 dígitos.\n";
+        return;
+    }
+
+    std::cout << "DNI (8 dígitos): ";
+    std::cin.getline(ciudadano.dni, 20); // Usar std::cin.getline para char[]
+
+    std::cout << "Nombres: ";
+    std::cin.getline(ciudadano.nombres, 50);
+
+    std::cout << "Apellidos: ";
+    std::cin.getline(ciudadano.apellidos, 50);
+
+    std::cout << "Nacionalidad: ";
+    std::cin.getline(ciudadano.nacionalidad, 20);
+
+    std::cout << "Lugar de Nacimiento: ";
+    std::cin.getline(ciudadano.lugarNacimiento, 50);
+
+    std::cout << "Departamento: ";
+    std::cin.getline(ciudadano.direccion.departamento, 50);
+
+    std::cout << "Provincia: ";
+    std::cin.getline(ciudadano.direccion.provincia, 50);
+
+    std::cout << "Ciudad: ";
+    std::cin.getline(ciudadano.direccion.ciudad, 50);
+
+    std::cout << "Distrito: ";
+    std::cin.getline(ciudadano.direccion.distrito, 50);
+
+    std::cout << "Teléfono: ";
+    std::cin.getline(ciudadano.telefono, 15);
+
+    std::cout << "Correo: ";
+    std::cin.getline(ciudadano.correo, 50);
+
+    std::cout << "Estado Civil: ";
+    std::cin.getline(ciudadano.estadoCivil, 15);
+
+
+    if (hashTable.insertar(ciudadano)) {
+        std::cout << "Ciudadano insertado con éxito.\n";
+    } else {
+        std::cout << "Error: No se pudo insertar el ciudadano.\n";
+    }
+}
+
+// Función para buscar un ciudadano
+void buscarCiudadano(CuckooHashing& hashTable) {
+    std::cout << "\n--- Buscar Ciudadano ---\n";
+    std::cout << "DNI del ciudadano a buscar: ";
+    std::string dni;
+    std::cin >> dni;
+
+    if (dni.length() != 8) {
+        std::cout << "Error: El DNI debe tener 8 dígitos.\n";
+        return;
+    }
+
+    auto resultado = hashTable.buscar(dni);
+    if (resultado.has_value()) {
+        Ciudadano ciudadano = resultado.value();
+        std::cout << "Ciudadano encontrado:\n";
+        std::cout << "DNI: " << ciudadano.dni << "\n";
+        std::cout << "Nombres: " << ciudadano.nombres << "\n";
+        std::cout << "Apellidos: " << ciudadano.apellidos << "\n";
+        std::cout << "Nacionalidad: " << ciudadano.nacionalidad << "\n";
+        std::cout << "Lugar de Nacimiento: " << ciudadano.lugarNacimiento << "\n";
+        std::cout << "Dirección: " << ciudadano.direccion.departamento << ", "
+                  << ciudadano.direccion.provincia << ", " << ciudadano.direccion.ciudad
+                  << ", " << ciudadano.direccion.distrito << "\n";
+        std::cout << "Teléfono: " << ciudadano.telefono << "\n";
+        std::cout << "Correo: " << ciudadano.correo << "\n";
+        std::cout << "Estado Civil: " << ciudadano.estadoCivil << "\n";
+    } else {
+        std::cout << "Ciudadano no encontrado.\n";
+    }
+}
+
+// Función para eliminar un ciudadano
+void eliminarCiudadano(CuckooHashing& hashTable) {
+    std::cout << "\n--- Eliminar Ciudadano ---\n";
+    std::cout << "DNI del ciudadano a eliminar: ";
+    std::string dni;
+    std::cin >> dni;
+
+    if (dni.length() != 8) {
+        std::cout << "Error: El DNI debe tener 8 dígitos.\n";
+        return;
+    }
+
+    if (hashTable.eliminar(dni)) {
+        std::cout << "Ciudadano eliminado con éxito.\n";
+    } else {
+        std::cout << "Ciudadano no encontrado.\n";
+    }
+}
+
+// Función para guardar la tabla hash
+void guardarTabla(CuckooHashing& hashTable) {
+    std::cout << "\n--- Guardar Tabla Hash ---\n";
+    std::cout << "Ingrese el nombre del archivo para guardar: ";
+    std::string archivo;
+    std::cin >> archivo;
+
+    try {
+        hashTable.guardarTabla(archivo);
+        std::cout << "Tabla hash guardada en " << archivo << "\n";
+    } catch (const std::exception& e) {
+        std::cout << "Error al guardar la tabla: " << e.what() << "\n";
+    }
+}
+
+// Función para cargar la tabla hash
+void cargarTabla(CuckooHashing& hashTable) {
+    std::cout << "\n--- Cargar Tabla Hash ---\n";
+    std::cout << "Ingrese el nombre del archivo para cargar: ";
+    std::string archivo;
+    std::cin >> archivo;
+
+    try {
+        hashTable.cargarTablaDesdeBinario(archivo);
+        std::cout << "Tabla hash cargada desde " << archivo << "\n";
+    } catch (const std::exception& e) {
+        std::cout << "Error al cargar la tabla: " << e.what() << "\n";
+    }
+}
+
+// Mostrar el menú principal
 void mostrarMenu(CuckooHashing& hashTable) {
     int opcion;
     do {
@@ -18,121 +151,34 @@ void mostrarMenu(CuckooHashing& hashTable) {
         std::cout << "1. Insertar Ciudadano\n";
         std::cout << "2. Buscar Ciudadano\n";
         std::cout << "3. Eliminar Ciudadano\n";
-        std::cout << "4. Salir\n";
-        std::cout << "Selecciona una opcion: ";
+        std::cout << "4. Guardar Tabla Hash\n";
+        std::cout << "5. Cargar Tabla Hash\n";
+        std::cout << "6. Salir\n";
+        std::cout << "Selecciona una opción: ";
         std::cin >> opcion;
 
         switch (opcion) {
-            case 1: {
-                std::cin.ignore();
-                Ciudadano ciudadano;
-                std::cout << "DNI: "; std::cin >> ciudadano.dni;
-                std::cout << "Nombres: "; std::cin >> ciudadano.nombres;
-                std::cout << "Apellidos: "; std::cin >> ciudadano.apellidos;
-                std::cout << "Nacionalidad: "; std::cin >> ciudadano.nacionalidad;
-                std::cout << "Lugar de Nacimiento: "; std::cin >> ciudadano.lugarNacimiento;
-
-                // Capturar los datos de Direccion uno por uno
-                std::cout << "Departamento: "; std::cin >> ciudadano.direccion.departamento;
-                std::cout << "Provincia: "; std::cin >> ciudadano.direccion.provincia;
-                std::cout << "Ciudad: "; std::cin >> ciudadano.direccion.ciudad;
-                std::cout << "Distrito: "; std::cin >> ciudadano.direccion.distrito;
-
-                std::cout << "Teléfono:+51 "; std::cin >> ciudadano.telefono;
-                std::cout << "Correo: "; std::cin >> ciudadano.correo;
-                std::cout << "Estado Civil: "; std::cin >> ciudadano.estadoCivil;
-
-                ciudadano.telefono = "+51" + ciudadano.telefono;
-                ciudadano.correo = ciudadano.correo + "@ejemplo.com";
-
-                if (hashTable.insertar(ciudadano)) {
-                    std::cout << "Ciudadano insertado con éxito.\n";
-                } else {
-                    std::cout << "Error al insertar ciudadano.\n";
-                }
+            case 1:
+                insertarCiudadano(hashTable);
                 break;
-            }
-            case 2: {
-                std::string dni;
-                std::cout << "DNI del ciudadano a buscar: ";
-                std::cin >> dni;
-
-                auto resultado = hashTable.buscar(dni);
-                if (resultado.has_value()) {
-                    std::cout << "Ciudadano encontrado:\n";
-                    std::cout << "DNI: " << resultado->dni << "\n";
-                    std::cout << "Nombres: " << resultado->nombres << "\n";
-                    std::cout << "Apellidos: " << resultado->apellidos << "\n";
-                } else {
-                    std::cout << "Ciudadano no encontrado.\n";
-                }
+            case 2:
+                buscarCiudadano(hashTable);
                 break;
-            }
-            case 3: {
-                std::string dni;
-                std::cout << "DNI del ciudadano a eliminar: ";
-                std::cin >> dni;
-
-                if (hashTable.eliminar(dni)) {
-                    std::cout << "Ciudadano eliminado con éxito.\n";
-                } else {
-                    std::cout << "Ciudadano no encontrado.\n";
-                }
+            case 3:
+                eliminarCiudadano(hashTable);
                 break;
-            }
             case 4:
+                guardarTabla(hashTable);
+                break;
+            case 5:
+                cargarTabla(hashTable);
+                break;
+            case 6:
                 std::cout << "Saliendo...\n";
                 break;
             default:
-                std::cout << "Opción inválida, intenta de nuevo.\n";
+                std::cout << "Opción inválida. Intenta de nuevo.\n";
                 break;
         }
-    } while (opcion != 4);
-}
-
-void cargarDatosDesdeCSV(const std::string& nombreArchivo, CuckooHashing& tablaHash) {
-    std::ifstream archivo(nombreArchivo);
-    if (!archivo.is_open()) {
-        std::cerr << "Error al abrir el archivo " << nombreArchivo << std::endl;
-        return;
-    }
-
-    std::string linea;
-    std::getline(archivo, linea); // Leer la primera línea (encabezado)
-
-    while (std::getline(archivo, linea)) {
-        std::stringstream ss(linea);
-        std::string dni, nombres, apellidos, nacionalidad, lugarNacimiento;
-        std::string departamento, provincia, ciudad, distrito;
-        std::string telefono, correo, estadoCivil;
-
-        // Leer cada campo separado por coma
-        std::getline(ss, dni, ',');
-        std::getline(ss, nombres, ',');
-        std::getline(ss, apellidos, ',');
-        std::getline(ss, nacionalidad, ',');
-        std::getline(ss, lugarNacimiento, ',');
-
-        // Leer los componentes de Direccion
-        std::getline(ss, departamento, ',');
-        std::getline(ss, provincia, ',');
-        std::getline(ss, ciudad, ',');
-        std::getline(ss, distrito, ',');
-
-        std::getline(ss, telefono, ',');
-        std::getline(ss, correo, ',');
-        std::getline(ss, estadoCivil, ',');
-
-        // Crear el objeto Direccion
-        Direccion direccion = {departamento, provincia, ciudad, distrito};
-
-        // Crear el objeto Ciudadano con el objeto Direccion
-        Ciudadano ciudadano(dni, nombres, apellidos, nacionalidad, lugarNacimiento, direccion, telefono, correo, estadoCivil);
-
-        // Insertar el ciudadano en la tabla hash usando el DNI como clave
-        tablaHash.insertar(ciudadano);
-    }
-
-    archivo.close();
-    std::cout << "Datos cargados desde " << nombreArchivo << " exitosamente." << std::endl;
+    } while (opcion != 6);
 }

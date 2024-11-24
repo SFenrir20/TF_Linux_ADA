@@ -5,13 +5,17 @@
 #ifndef MENU_H
 #define MENU_H
 
-
 #include <string>
 #include "CuckooHashing.h"
 
-void cargarDatosDesdeCSV(const std::string& nombreArchivo, CuckooHashing& tablaHash);
+// Declaraciones de funciones del menú principal
 void mostrarMenu(CuckooHashing& hashTable);
 
-
+// Funciones específicas del menú (opcional, para mayor modularidad)
+void insertarCiudadano(CuckooHashing& hashTable);
+void buscarCiudadano(CuckooHashing& hashTable);
+void eliminarCiudadano(CuckooHashing& hashTable);
+void guardarTabla(CuckooHashing& hashTable);
+void cargarTabla(CuckooHashing& hashTable);
 
 #endif //MENU_H
