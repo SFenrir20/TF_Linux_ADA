@@ -12,6 +12,7 @@ add_executable(TF_Linux_EDA main.cpp
         main.cpp
         main.cpp
         main.cpp
+        server.cpp
 )
 
 target_link_libraries(TF_Linux_EDA ${Boost_LIBRARIES})
