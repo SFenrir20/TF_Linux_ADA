@@ -1,0 +1,12 @@
+{
+  "server": {
+    "port": 8080
+  },
+  "hashTable": {
+    "initialSite": 200
+  },
+  "storage": {
+    "indexFile": "ciudadano_inidice.bin",
+    "dataFile": "ciudadano.bin"
+  }
+}
